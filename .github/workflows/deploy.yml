@@ -21,11 +21,16 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd ${{ secrets.PROJECT_PATH }}
-          echo "Current directory:"
-          pwd
-          echo "Directory contents:"
-          ls -la
-          git status
-          git pull origin main
+          if [ ! -d ".git" ]; then
+            echo "Initializing Git..."
+            git init
+            git remote add origin git@github.com:${{ github.repository }}.git
+            git fetch origin
+            git reset --hard origin/main
+            git branch --set-upstream-to=origin/main main
+          else
+            echo "Pulling changes..."
+            git pull origin main
+          fi
           composer install --no-dev --optimize-autoloader
           # php artisan migrate --force # Uncomment if you have migrations
