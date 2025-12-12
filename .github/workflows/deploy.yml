@@ -21,6 +21,11 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         script: |
           cd ${{ secrets.PROJECT_PATH }}
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          git status
           git pull origin main
           composer install --no-dev --optimize-autoloader
           # php artisan migrate --force # Uncomment if you have migrations
