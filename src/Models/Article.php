@@ -30,8 +30,13 @@ class Article
         }
 
         if (!empty($filters['search'])) {
-             $where[] = "(MATCH(title, description) AGAINST(:search IN NATURAL LANGUAGE MODE))";
-             $params[':search'] = $filters['search'];
+             if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                 $where[] = "(title LIKE :search OR description LIKE :search)";
+                 $params[':search'] = '%' . $filters['search'] . '%';
+             } else {
+                 $where[] = "(MATCH(title, description) AGAINST(:search IN NATURAL LANGUAGE MODE))";
+                 $params[':search'] = $filters['search'];
+             }
         }
 
         $whereSql = implode(' AND ', $where);
@@ -58,9 +63,17 @@ class Article
     public static function create($data)
     {
         $db = Database::getInstance()->getConnection();
-        $sql = "INSERT INTO articles (source_id, title, url, description, content, author, published_at, image_url, guid, hash) 
+        $driver = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+        
+        if ($driver === 'sqlite') {
+             $sql = "INSERT INTO articles (source_id, title, url, description, content, author, published_at, image_url, guid, hash) 
                 VALUES (:source_id, :title, :url, :description, :content, :author, :published_at, :image_url, :guid, :hash)
-                ON DUPLICATE KEY UPDATE updated_at = NOW()"; // Simple upsert handling
+                ON CONFLICT(hash) DO UPDATE SET updated_at = DATETIME('now')";
+        } else {
+             $sql = "INSERT INTO articles (source_id, title, url, description, content, author, published_at, image_url, guid, hash) 
+                VALUES (:source_id, :title, :url, :description, :content, :author, :published_at, :image_url, :guid, :hash)
+                ON DUPLICATE KEY UPDATE updated_at = NOW()";
+        }
         
         $stmt = $db->prepare($sql);
         $stmt->execute([

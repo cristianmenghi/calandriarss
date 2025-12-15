@@ -15,7 +15,11 @@ class Database
         $config = require __DIR__ . '/../../config/database.php';
 
         try {
-            $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
+            if (($config['driver'] ?? 'mysql') === 'sqlite') {
+                $dsn = "sqlite:{$config['database']}";
+            } else {
+                $dsn = "mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset={$config['charset']}";
+            }
             $this->pdo = new PDO($dsn, $config['username'], $config['password'], $config['options']);
         } catch (PDOException $e) {
             die("Database Connection Failed: " . $e->getMessage());
