@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calandria RSS Terminal</title>
-    <link rel="stylesheet" href="/assets/css/terminal-frontend.css">
+    <link rel="stylesheet" href="/assets/css/terminal-frontend.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -45,6 +45,6 @@
         </div>
     </div>
 
-    <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/app.js?v=2"></script>
 </body>
 </html>

@@ -10,9 +10,9 @@
     --terminal-bg-lighter: #2a2a2a;
     --terminal-fg: #e0e0e0;
     --terminal-fg-dim: #888888;
-    --terminal-accent: #00ff00;
-    /* Classic Green for Frontend */
-    --terminal-accent-dim: #008800;
+    --terminal-accent: #ffffff;
+    /* White for Frontend as requested */
+    --terminal-accent-dim: #888888;
     --terminal-border: #333333;
 
     --spacing-xs: 0.25rem;
