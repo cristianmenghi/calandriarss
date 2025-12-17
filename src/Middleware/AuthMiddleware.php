@@ -43,8 +43,8 @@ class AuthMiddleware
             }
         }
 
-        // Check CSRF token for POST/PUT/DELETE requests
-        if (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'DELETE'])) {
+        // Check CSRF token for POST/PUT/DELETE requests (except login)
+        if (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'DELETE']) && $currentPath !== '/login' && $currentPath !== '/logout') {
             self::validateCsrfToken();
         }
 
