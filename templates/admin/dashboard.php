@@ -78,13 +78,25 @@
             </div>
 
             <div class="admin-footer">
-                <div class="footer-links">
                     <a href="https://github.com/cristianmenghi/calandriarss" class="footer-link" target="_blank">GitHub</a>
                     <span class="separator">·</span>
-                    <a href="/README.md" class="footer-link">About</a>
+                    <a href="https://github.com/cristianmenghi/calandriarss/blob/main/README.md" class="footer-link" target="_blank">About</a>
                     <span class="separator">·</span>
-                    <span class="footer-link" style="cursor: default;">v2.0</span>
+                    <span id="app-version" class="footer-link" style="cursor: default;">...</span>
                 </div>
+                <script>
+                    fetch('https://api.github.com/repos/cristianmenghi/calandriarss/releases/latest')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.tag_name) {
+                                document.getElementById('app-version').textContent = data.tag_name;
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Failed to fetch version', err);
+                            document.getElementById('app-version').textContent = 'v1.0';
+                        });
+                </script>
             </div>
         </aside>
 

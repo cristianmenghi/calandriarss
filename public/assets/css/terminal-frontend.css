@@ -247,3 +247,32 @@ body {
         border-right: none;
     }
 }
+
+/* Footer */
+.column-footer {
+    margin-top: auto;
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--terminal-border);
+    background: var(--terminal-bg-light);
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    font-size: 0.75rem;
+}
+
+.footer-link {
+    color: var(--terminal-fg-dim);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+    color: var(--terminal-accent);
+}
+
+.separator {
+    color: var(--terminal-border);
+}

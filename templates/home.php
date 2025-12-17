@@ -19,6 +19,28 @@
             <div class="column-content" id="categories-list">
                 <div class="loading">_loading_data...</div>
             </div>
+            <div class="column-footer">
+                <div class="footer-links">
+                    <a href="https://github.com/cristianmenghi/calandriarss" class="footer-link" target="_blank">GitHub</a>
+                    <span class="separator">·</span>
+                    <a href="https://github.com/cristianmenghi/calandriarss/blob/main/README.md" class="footer-link" target="_blank">About</a>
+                    <span class="separator">·</span>
+                    <span id="app-version" class="footer-link" style="cursor: default;">...</span>
+                </div>
+            </div>
+            <script>
+                fetch('https://api.github.com/repos/cristianmenghi/calandriarss/releases/latest')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.tag_name) {
+                            document.getElementById('app-version').textContent = data.tag_name;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to fetch version', err);
+                        document.getElementById('app-version').textContent = 'v1.0';
+                    });
+            </script>
         </div>
 
         <!-- Column 2: Articles List -->
