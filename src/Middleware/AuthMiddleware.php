@@ -166,8 +166,16 @@ class AuthMiddleware
 
     private static function isPublicRoute($path)
     {
-        foreach (self::$publicRoutes as $route) {
-            if ($path === $route || strpos($path, $route) === 0) {
+        // Exact match for specific public routes
+        $exactRoutes = ['/login', '/', '/offline.html', '/manifest.json', '/sw.js'];
+        if (in_array($path, $exactRoutes)) {
+            return true;
+        }
+        
+        // Prefix match for API routes
+        $prefixRoutes = ['/api/articles', '/api/sources', '/api/categories'];
+        foreach ($prefixRoutes as $route) {
+            if (strpos($path, $route) === 0) {
                 return true;
             }
         }
