@@ -55,7 +55,10 @@ class UserController
         
         $data = json_decode(file_get_contents('php://input'), true);
         
-        // Remove password from update data (use changePassword instead)
+        // Handle password update if provided
+        if (!empty($data['password'])) {
+            User::updatePassword($id, $data['password']);
+        }
         unset($data['password']);
         
         $success = User::update($id, $data);

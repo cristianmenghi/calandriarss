@@ -203,12 +203,10 @@ class AdminPanel {
                     <label class="prompt"><span class="prompt-symbol">></span> Email:</label>
                     <input type="email" name="email" class="terminal-input" value="${item?.email || ''}" required>
                 </div>
-                ${!item ? `
                 <div class="form-group">
-                    <label class="prompt"><span class="prompt-symbol">></span> Password:</label>
-                    <input type="password" name="password" class="terminal-input" required>
+                    <label class="prompt"><span class="prompt-symbol">></span> ${item ? 'New Password (leave blank to keep):' : 'Password:'}</label>
+                    <input type="password" name="password" class="terminal-input" ${item ? '' : 'required'} placeholder="${item ? '********' : ''}">
                 </div>
-                ` : ''}
                 <div class="form-group">
                     <label class="prompt"><span class="prompt-symbol">></span> Role:</label>
                     <select name="role" class="terminal-input" required>
