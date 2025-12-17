@@ -182,4 +182,12 @@ class User
         
         return $stmt->fetch() !== false;
     }
+    
+    public static function getCount()
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->query("SELECT COUNT(*) as count FROM users");
+        $result = $stmt->fetch();
+        return $result['count'];
+    }
 }
