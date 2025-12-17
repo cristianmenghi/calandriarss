@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline ~ Calandria RSS</title>
+    <link rel="stylesheet" href="/assets/css/admin-terminal.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="login-page">
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <span class="terminal-title">calandria@rss:~$ offline</span>
+            <span class="terminal-controls">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </span>
+        </div>
+        
+        <div class="terminal-body">
+            <pre class="ascii-art">
+ ___  ___ ___ _ _                
+/ _ \|  _|  _| (_)_ _  ___       
+| (_) | | | | | | | ' \/ -_)     
+\___/|_| |_| |_|_|_||_\___|      
+                                  
+Connection Lost
+            </pre>
+
+            <div class="terminal-error">
+                <span class="prompt">ERROR:</span> No network connection detected
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <p style="color: var(--terminal-fg-dim); margin-bottom: 1rem;">
+                    <span class="prompt-symbol">></span> You are currently offline. 
+                </p>
+                <p style="color: var(--terminal-fg-dim); margin-bottom: 1rem;">
+                    <span class="prompt-symbol">></span> Some features may be unavailable.
+                </p>
+                <p style="color: var(--terminal-fg-dim);">
+                    <span class="prompt-symbol">></span> Cached articles are still accessible.
+                </p>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <button onclick="window.location.reload()" class="terminal-button">
+                    <span class="prompt-symbol">></span> retry connection
+                </button>
+            </div>
+
+            <div class="terminal-footer">
+                <p class="hint">The app will automatically reconnect when online</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-reload when back online
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+
+        // Show connection status
+        function updateStatus() {
+            const status = navigator.onLine ? 'online' : 'offline';
+            console.log('[Offline Page] Status:', status);
+        }
+
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+    </script>
+</body>
+</html>

@@ -98,4 +98,69 @@ class Article
         $stmt->execute([':hash' => $hash]);
         return $stmt->fetchColumn();
     }
+    
+    public static function getCount()
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->query("SELECT COUNT(*) as count FROM articles WHERE is_visible = 1");
+        $result = $stmt->fetch();
+        return $result['count'];
+    }
+    
+    public static function getRecent($limit = 10)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $sql = "SELECT a.*, s.name as source_name 
+                FROM articles a 
+                JOIN sources s ON a.source_id = s.id 
+                WHERE a.is_visible = 1 
+                ORDER BY a.published_at DESC 
+                LIMIT :limit";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
+    
+    public static function getTimeSeries($days = 30)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $sql = "SELECT 
+                    DATE(created_at) as date,
+                    COUNT(*) as count
+                FROM articles
+                WHERE created_at > DATE_SUB(NOW(), INTERVAL :days DAY)
+                GROUP BY DATE(created_at)
+                ORDER BY date ASC";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':days', $days, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
+    
+    public static function getTrending($limit = 10)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $sql = "SELECT a.*, s.name as source_name, COUNT(av.id) as view_count
+                FROM articles a
+                JOIN sources s ON a.source_id = s.id
+                LEFT JOIN article_views av ON a.id = av.article_id
+                WHERE a.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY)
+                GROUP BY a.id
+                ORDER BY view_count DESC
+                LIMIT :limit";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
 }

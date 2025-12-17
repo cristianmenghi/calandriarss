@@ -43,4 +43,135 @@ class Source
          $stmt = $db->prepare("UPDATE sources SET last_fetched_at = NOW() WHERE id = :id");
          $stmt->execute([':id' => $id]);
     }
+    
+    public static function findById($id)
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT * FROM sources WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+    
+    public static function update($id, $data)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $fields = [];
+        $params = [':id' => $id];
+        
+        if (isset($data['name'])) {
+            $fields[] = "name = :name";
+            $params[':name'] = $data['name'];
+        }
+        
+        if (isset($data['website_url'])) {
+            $fields[] = "website_url = :website_url";
+            $params[':website_url'] = $data['website_url'];
+        }
+        
+        if (isset($data['rss_feed_url'])) {
+            $fields[] = "rss_feed_url = :rss_feed_url";
+            $params[':rss_feed_url'] = $data['rss_feed_url'];
+        }
+        
+        if (isset($data['category'])) {
+            $fields[] = "category = :category";
+            $params[':category'] = $data['category'];
+        }
+        
+        if (isset($data['logo_url'])) {
+            $fields[] = "logo_url = :logo_url";
+            $params[':logo_url'] = $data['logo_url'];
+        }
+        
+        if (isset($data['description'])) {
+            $fields[] = "description = :description";
+            $params[':description'] = $data['description'];
+        }
+        
+        if (isset($data['is_active'])) {
+            $fields[] = "is_active = :is_active";
+            $params[':is_active'] = $data['is_active'];
+        }
+        
+        if (empty($fields)) {
+            return false;
+        }
+        
+        $sql = "UPDATE sources SET " . implode(', ', $fields) . " WHERE id = :id";
+        $stmt = $db->prepare($sql);
+        return $stmt->execute($params);
+    }
+    
+    public static function delete($id)
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("DELETE FROM sources WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
+    }
+    
+    public static function getCount()
+    {
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->query("SELECT COUNT(*) as count FROM sources");
+        $result = $stmt->fetch();
+        return $result['count'];
+    }
+    
+    public static function paginate($page = 1, $limit = 20)
+    {
+        $db = Database::getInstance()->getConnection();
+        $offset = ($page - 1) * $limit;
+        
+        $sql = "SELECT s.*, COUNT(a.id) as article_count 
+                FROM sources s 
+                LEFT JOIN articles a ON s.id = a.source_id 
+                GROUP BY s.id 
+                ORDER BY s.created_at DESC 
+                LIMIT :limit OFFSET :offset";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
+    
+    public static function getStats($id)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $stmt = $db->prepare("
+            SELECT 
+                COUNT(a.id) as total_articles,
+                COUNT(CASE WHEN a.created_at > DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as articles_last_7d,
+                COUNT(CASE WHEN a.created_at > DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as articles_last_30d,
+                MAX(a.created_at) as last_article_date
+            FROM articles a
+            WHERE a.source_id = :id
+        ");
+        
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch();
+    }
+    
+    public static function getTopSources($limit = 5)
+    {
+        $db = Database::getInstance()->getConnection();
+        
+        $sql = "SELECT s.*, COUNT(a.id) as article_count 
+                FROM sources s 
+                LEFT JOIN articles a ON s.id = a.source_id 
+                WHERE a.created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)
+                GROUP BY s.id 
+                ORDER BY article_count DESC 
+                LIMIT :limit";
+        
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        return $stmt->fetchAll();
+    }
 }

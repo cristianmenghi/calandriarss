@@ -15,11 +15,34 @@ class Router
     {
         $this->routes['POST'][$path] = $callback;
     }
+    
+    public function put($path, $callback)
+    {
+        $this->routes['PUT'][$path] = $callback;
+    }
+    
+    public function delete($path, $callback)
+    {
+        $this->routes['DELETE'][$path] = $callback;
+    }
 
     public function resolve()
     {
         $method = $_SERVER['REQUEST_METHOD'];
+        
+        // Handle method override for PUT/DELETE from forms
+        if ($method === 'POST' && isset($_POST['_method'])) {
+            $method = strtoupper($_POST['_method']);
+        }
+        
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        // Check if routes exist for this method
+        if (!isset($this->routes[$method])) {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method Not Allowed']);
+            return;
+        }
 
         // Simple wildcard matching for ID parameters (e.g., /api/articles/123)
         foreach ($this->routes[$method] as $route => $callback) {
