@@ -12,7 +12,7 @@ class AdminPanel {
 
     init() {
         this.setupEventListeners();
-        this.loadData();
+        // Don't load data here - wait for currentView to be set by page
     }
 
     setupEventListeners() {
@@ -25,6 +25,11 @@ class AdminPanel {
         document.querySelectorAll('[data-action="refresh"]').forEach(btn => {
             btn.addEventListener('click', () => this.loadData());
         });
+    }
+
+    setView(view) {
+        this.currentView = view;
+        this.loadData();
     }
 
     async loadData() {

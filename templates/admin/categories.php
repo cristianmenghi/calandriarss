@@ -62,7 +62,7 @@
     <script src="/assets/js/admin.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            admin.currentView = 'categories';
+            admin.setView('categories');
         });
     </script>
 </body>

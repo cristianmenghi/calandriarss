@@ -62,9 +62,8 @@
 
     <script src="/assets/js/admin.js"></script>
     <script>
-        // Set current view
         document.addEventListener('DOMContentLoaded', () => {
-            admin.currentView = 'sources';
+            admin.setView('sources');
         });
     </script>
 </body>
