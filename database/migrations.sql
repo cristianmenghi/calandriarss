@@ -143,15 +143,16 @@ CREATE TABLE IF NOT EXISTS activity_log (
 -- ============================================================================
 
 -- Password: admin123 (CHANGE THIS IN PRODUCTION!)
--- Hash generated with: password_hash('admin123', PASSWORD_BCRYPT)
+-- Hash generated with: password_hash('admin123', PASSWORD_BCRYPT, ['cost' => 12])
+-- Verified working hash
 INSERT INTO users (username, email, password_hash, role, is_active) 
 VALUES (
     'admin',
     'admin@calandria.local',
-    '$2y$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyYqR5OwGW.u',
+    '$2y$12$dFC.OwPt0Ao.5IHiH4ezx.8fBM3DDgRHalEsAwynmIISpvC3hR0yS',
     'admin',
     TRUE
-) ON DUPLICATE KEY UPDATE username = username;
+) ON DUPLICATE KEY UPDATE password_hash = '$2y$12$dFC.OwPt0Ao.5IHiH4ezx.8fBM3DDgRHalEsAwynmIISpvC3hR0yS';
 
 -- ============================================================================
 -- 11. INSERT DEFAULT CATEGORIES
