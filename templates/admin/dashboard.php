@@ -97,8 +97,8 @@
                 </div>
                 <div class="top-nav">
                     <span style="color: var(--terminal-fg-dim);">
-                        <?= htmlspecialchars($user['username']) ?> 
-                        <span style="color: var(--terminal-accent);">[<?= $user['role'] ?>]</span>
+                        <?= htmlspecialchars($user['username'] ?? 'Guest') ?> 
+                        <span style="color: var(--terminal-accent);">[<?= $user['role'] ?? 'none' ?>]</span>
                     </span>
                 </div>
             </div>
