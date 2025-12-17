@@ -34,7 +34,15 @@ jobs:
             git branch --set-upstream-to=origin/main main
           else
             echo "Pulling changes..."
+            # Remove conflicting untracked files
+            rm -f composer.lock
+            # Stash any local changes
+            git stash
+            # Pull latest changes
             git pull origin main
+            # Pop stashed changes if any
+            git stash pop || true
           fi
+          echo "Installing dependencies..."
           composer install --no-dev --optimize-autoloader
-          # php artisan migrate --force # Uncomment if you have migrations
+          echo "Deployment complete!"
