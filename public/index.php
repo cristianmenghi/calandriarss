@@ -52,8 +52,7 @@ $router->get('/admin', [$admin, 'dashboard']);
 $router->get('/admin/sources', [$admin, 'sources']);
 $router->get('/admin/categories', [$admin, 'categories']);
 $router->get('/admin/users', [$admin, 'users']);
-$router->get('/admin/logs', [$admin, 'logs']);
-$router->get('/admin/settings', [$admin, 'settings']);
+$router->get('/admin/users', [$admin, 'users']);
 
 // ============================================================================
 // ADMIN API ROUTES - Sources

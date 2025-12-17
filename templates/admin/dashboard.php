@@ -50,22 +50,11 @@
                             <span class="badge"><?= $stats['total_users'] ?></span>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="/admin/logs" class="nav-link">
-                            Fetch Logs
-                        </a>
-                    </li>
                 </ul>
             </nav>
 
             <div class="nav-section">
-                <div class="nav-section-title">Settings</div>
                 <ul class="nav-list">
-                    <li class="nav-item">
-                        <a href="/admin/settings" class="nav-link">
-                            Configuration
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <form method="POST" action="/logout" style="margin: 0;">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">

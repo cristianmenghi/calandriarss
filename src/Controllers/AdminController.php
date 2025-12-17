@@ -60,24 +60,4 @@ class AdminController
             'csrf_token' => AuthMiddleware::generateCsrfToken()
         ]);
     }
-
-    public function logs()
-    {
-        AuthMiddleware::handle();
-        
-        view('admin/logs', [
-            'user' => AuthMiddleware::getCurrentUser(),
-            'csrf_token' => AuthMiddleware::generateCsrfToken()
-        ]);
-    }
-
-    public function settings()
-    {
-        AuthMiddleware::requireRole('admin');
-        
-        view('admin/settings', [
-            'user' => AuthMiddleware::getCurrentUser(),
-            'csrf_token' => AuthMiddleware::generateCsrfToken()
-        ]);
-    }
 }

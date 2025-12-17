@@ -24,7 +24,7 @@
                     <li class="nav-item"><a href="/admin/sources" class="nav-link active">Sources</a></li>
                     <li class="nav-item"><a href="/admin/categories" class="nav-link">Categories</a></li>
                     <li class="nav-item"><a href="/admin/users" class="nav-link">Users</a></li>
-                    <li class="nav-item"><a href="/admin/logs" class="nav-link">Fetch Logs</a></li>
+
                 </ul>
             </nav>
             <div class="admin-footer">
