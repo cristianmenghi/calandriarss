@@ -93,7 +93,7 @@
             <div class="admin-topbar">
                 <div class="tabs">
                     <button class="tab active">Dashboard</button>
-                    <button class="tab" onclick="window.location.href='/'">Frontend</button>
+                    <button class="tab" onclick="window.open('/', '_blank')">Frontend</button>
                 </div>
                 <div class="top-nav">
                     <span style="color: var(--terminal-fg-dim);">
