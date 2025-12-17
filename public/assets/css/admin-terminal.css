@@ -11,20 +11,20 @@
     --terminal-bg-lighter: #2a2a2a;
     --terminal-fg: #e0e0e0;
     --terminal-fg-dim: #888888;
-    --terminal-accent: #00ff00;
-    --terminal-accent-dim: #00aa00;
+    --terminal-accent: #ffffff;
+    --terminal-accent-dim: #cccccc;
     --terminal-error: #ff5555;
     --terminal-warning: #ffaa00;
     --terminal-info: #55aaff;
     --terminal-border: #333333;
-    
+
     /* Spacing */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
+
     /* Typography */
     --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     --font-size-sm: 0.875rem;
@@ -81,7 +81,7 @@ body {
     justify-content: center;
     min-height: 100vh;
     padding: var(--spacing-md);
-    background: 
+    background:
         linear-gradient(0deg, rgba(0, 255, 0, 0.02) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 255, 0, 0.02) 1px, transparent 1px);
     background-size: 20px 20px;
@@ -124,9 +124,17 @@ body {
     background: var(--terminal-border);
 }
 
-.terminal-controls .dot:nth-child(1) { background: var(--terminal-error); }
-.terminal-controls .dot:nth-child(2) { background: var(--terminal-warning); }
-.terminal-controls .dot:nth-child(3) { background: var(--terminal-accent); }
+.terminal-controls .dot:nth-child(1) {
+    background: var(--terminal-error);
+}
+
+.terminal-controls .dot:nth-child(2) {
+    background: var(--terminal-warning);
+}
+
+.terminal-controls .dot:nth-child(3) {
+    background: var(--terminal-accent);
+}
 
 .terminal-body {
     padding: var(--spacing-xl);
@@ -644,19 +652,19 @@ body {
     .admin-layout {
         flex-direction: column;
     }
-    
+
     .admin-sidebar {
         width: 100%;
         border-right: none;
         border-bottom: 1px solid var(--terminal-border);
         max-height: 50vh;
     }
-    
+
     .tabs {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
-    
+
     .stats-grid {
         grid-template-columns: 1fr;
     }
@@ -664,8 +672,16 @@ body {
 
 /* Animations */
 @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+
+    0%,
+    50% {
+        opacity: 1;
+    }
+
+    51%,
+    100% {
+        opacity: 0;
+    }
 }
 
 .cursor-blink::after {

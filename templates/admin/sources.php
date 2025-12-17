@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf_token) ?>">
     <title>Sources ~ Calandria RSS Admin</title>
     <link rel="stylesheet" href="/assets/css/admin-terminal.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,20 +47,25 @@
                 </div>
             </div>
             <div class="admin-content">
-                <h1 style="color: var(--terminal-accent); margin-bottom: 2rem;">> Sources Management</h1>
-                <p style="color: var(--terminal-fg-dim);">Manage RSS feed sources. Use the API endpoints to add, edit, or delete sources.</p>
-                <div style="margin-top: 2rem;">
-                    <h3 style="color: var(--terminal-accent);">API Endpoints:</h3>
-                    <pre style="background: var(--terminal-bg-light); padding: 1rem; border-radius: 4px; overflow-x: auto;">
-GET    /api/admin/sources          - List all sources
-POST   /api/admin/sources          - Create new source
-PUT    /api/admin/sources/{id}     - Update source
-DELETE /api/admin/sources/{id}     - Delete source
-POST   /api/admin/sources/test     - Test RSS feed URL
-                    </pre>
+                <div class="toolbar">
+                    <h1 style="color: var(--terminal-accent); margin: 0;">> Sources Management</h1>
+                    <div class="toolbar-actions">
+                        <button class="terminal-button" data-action="add" data-type="sources">+ Add Source</button>
+                        <button class="terminal-button" data-action="refresh">↻ Refresh</button>
+                    </div>
                 </div>
+                
+                <div id="sources-table" class="loading">Loading sources...</div>
             </div>
         </main>
     </div>
+
+    <script src="/assets/js/admin.js"></script>
+    <script>
+        // Set current view
+        document.addEventListener('DOMContentLoaded', () => {
+            admin.currentView = 'sources';
+        });
+    </script>
 </body>
 </html>
