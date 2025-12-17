@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf_token) ?>">
     <title>Users ~ Calandria RSS Admin</title>
     <link rel="stylesheet" href="/assets/css/admin-terminal.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,7 +24,6 @@
                     <li class="nav-item"><a href="/admin/sources" class="nav-link">Sources</a></li>
                     <li class="nav-item"><a href="/admin/categories" class="nav-link">Categories</a></li>
                     <li class="nav-item"><a href="/admin/users" class="nav-link active">Users</a></li>
-                    <li class="nav-item"><a href="/admin/logs" class="nav-link">Fetch Logs</a></li>
                 </ul>
             </nav>
             <div class="admin-footer">
@@ -46,20 +46,24 @@
                 </div>
             </div>
             <div class="admin-content">
-                <h1 style="color: var(--terminal-accent); margin-bottom: 2rem;">> Users Management</h1>
-                <p style="color: var(--terminal-fg-dim); margin-bottom: 1rem;">⚠️ Admin only. Manage system users and permissions.</p>
-                <div style="margin-top: 2rem;">
-                    <h3 style="color: var(--terminal-accent);">API Endpoints:</h3>
-                    <pre style="background: var(--terminal-bg-light); padding: 1rem; border-radius: 4px; overflow-x: auto;">
-GET    /api/admin/users              - List all users
-POST   /api/admin/users              - Create new user
-PUT    /api/admin/users/{id}         - Update user
-DELETE /api/admin/users/{id}         - Delete user
-POST   /api/admin/users/{id}/password - Change password
-                    </pre>
+                <div class="toolbar">
+                    <h1 style="color: var(--terminal-accent); margin: 0;">> Users Management</h1>
+                    <div class="toolbar-actions">
+                        <button class="terminal-button" data-action="add" data-type="users">+ Add User</button>
+                        <button class="terminal-button" data-action="refresh">↻ Refresh</button>
+                    </div>
                 </div>
+                
+                <div id="users-table" class="loading">Loading users...</div>
             </div>
         </main>
     </div>
+
+    <script src="/assets/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            admin.currentView = 'users';
+        });
+    </script>
 </body>
 </html>

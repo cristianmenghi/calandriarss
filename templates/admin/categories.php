@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrf_token) ?>">
     <title>Categories ~ Calandria RSS Admin</title>
     <link rel="stylesheet" href="/assets/css/admin-terminal.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -23,7 +24,6 @@
                     <li class="nav-item"><a href="/admin/sources" class="nav-link">Sources</a></li>
                     <li class="nav-item"><a href="/admin/categories" class="nav-link active">Categories</a></li>
                     <li class="nav-item"><a href="/admin/users" class="nav-link">Users</a></li>
-                    <li class="nav-item"><a href="/admin/logs" class="nav-link">Fetch Logs</a></li>
                 </ul>
             </nav>
             <div class="admin-footer">
@@ -46,19 +46,24 @@
                 </div>
             </div>
             <div class="admin-content">
-                <h1 style="color: var(--terminal-accent); margin-bottom: 2rem;">> Categories Management</h1>
-                <p style="color: var(--terminal-fg-dim);">Manage content categories. Use the API endpoints to add, edit, or delete categories.</p>
-                <div style="margin-top: 2rem;">
-                    <h3 style="color: var(--terminal-accent);">API Endpoints:</h3>
-                    <pre style="background: var(--terminal-bg-light); padding: 1rem; border-radius: 4px; overflow-x: auto;">
-GET    /api/admin/categories       - List all categories
-POST   /api/admin/categories       - Create new category
-PUT    /api/admin/categories/{id}  - Update category
-DELETE /api/admin/categories/{id}  - Delete category
-                    </pre>
+                <div class="toolbar">
+                    <h1 style="color: var(--terminal-accent); margin: 0;">> Categories Management</h1>
+                    <div class="toolbar-actions">
+                        <button class="terminal-button" data-action="add" data-type="categories">+ Add Category</button>
+                        <button class="terminal-button" data-action="refresh">↻ Refresh</button>
+                    </div>
                 </div>
+                
+                <div id="categories-table" class="loading">Loading categories...</div>
             </div>
         </main>
     </div>
+
+    <script src="/assets/js/admin.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            admin.currentView = 'categories';
+        });
+    </script>
 </body>
 </html>
