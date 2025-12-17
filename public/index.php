@@ -89,5 +89,11 @@ $router->get('/', function() {
     view('home');
 });
 
+// ============================================================================
+// EXECUTE MIDDLEWARE AND RESOLVE ROUTE
+// ============================================================================
+// Execute authentication middleware (checks session, CSRF, etc.)
+AuthMiddleware::handle();
+
 // Resolve route
 $router->resolve();
