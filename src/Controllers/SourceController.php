@@ -78,6 +78,27 @@ class SourceController
         }
     }
 
+    public function show($id)
+    {
+        AuthMiddleware::handle();
+        
+        try {
+            $source = Source::findById($id);
+            if (!$source) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Source not found']);
+                return;
+            }
+            
+            header('Content-Type: application/json');
+            echo json_encode(['data' => $source]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode(['error' => $e->getMessage()]);
+        }
+    }
+
     public function update($id)
     {
         AuthMiddleware::handle();

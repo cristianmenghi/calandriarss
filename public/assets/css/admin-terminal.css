@@ -613,6 +613,46 @@ body {
     color: var(--terminal-border);
 }
 
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px dashed var(--terminal-border);
+}
+
+.pagination-btn {
+    background: transparent;
+    border: 1px solid var(--terminal-accent);
+    color: var(--terminal-accent);
+    padding: var(--spacing-xs) var(--spacing-md);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.pagination-btn:hover:not(.disabled) {
+    background: var(--terminal-accent);
+    color: var(--terminal-bg);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: var(--terminal-border);
+    color: var(--terminal-fg-dim);
+}
+
+.pagination-info {
+    font-size: var(--font-size-sm);
+    color: var(--terminal-fg-dim);
+}
+
 /* Right Panel */
 .admin-main {
     flex: 1;

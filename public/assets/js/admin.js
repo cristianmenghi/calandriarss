@@ -10,12 +10,12 @@ class AdminPanel {
         this.categories = [];
         this.searchQuery = '';
         this.searchTimeout = null;
+        this.page = 1;
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        // Don't load data here - wait for currentView to be set by page
     }
 
     setupEventListeners() {
@@ -26,7 +26,10 @@ class AdminPanel {
 
         // Refresh buttons
         document.querySelectorAll('[data-action="refresh"]').forEach(btn => {
-            btn.addEventListener('click', () => this.loadData());
+            btn.addEventListener('click', () => {
+                this.page = 1;
+                this.loadData();
+            });
         });
 
         // Search input
@@ -34,6 +37,7 @@ class AdminPanel {
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 this.searchQuery = e.target.value;
+                this.page = 1; // Reset to first page on search
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.loadData();
@@ -44,25 +48,28 @@ class AdminPanel {
 
     setView(view) {
         this.currentView = view;
+        this.page = 1;
         this.loadData();
     }
 
     async loadData() {
         const view = this.currentView;
-        let endpoint = `/api/admin/${view}`;
+        let endpoint = `/api/admin/${view}?page=${this.page}`;
 
         // Add search query for sources
         if (view === 'sources' && this.searchQuery) {
-            endpoint += `?search=${encodeURIComponent(this.searchQuery)}`;
+            endpoint += `&search=${encodeURIComponent(this.searchQuery)}`;
         }
 
         try {
             const response = await fetch(endpoint);
             const data = await response.json();
-            this.renderTable(view, data.data || data);
 
-            // Re-bind search input if it's in the DOM but doesn't have listeners
-            // (e.g. if we switch views and come back, though currently we stay on the same page)
+            // Handle pagination metadata if present
+            const items = data.data || data;
+            const pagination = data.pagination || null;
+
+            this.renderTable(view, items, pagination);
             this.bindSearchInput();
         } catch (error) {
             this.showError('Failed to load data: ' + error.message);
@@ -76,6 +83,7 @@ class AdminPanel {
             searchInput.value = this.searchQuery;
             searchInput.addEventListener('input', (e) => {
                 this.searchQuery = e.target.value;
+                this.page = 1;
                 clearTimeout(this.searchTimeout);
                 this.searchTimeout = setTimeout(() => {
                     this.loadData();
@@ -84,7 +92,7 @@ class AdminPanel {
         }
     }
 
-    renderTable(type, items) {
+    renderTable(type, items, pagination = null) {
         const container = document.getElementById(`${type}-table`);
         if (!container) return;
 
@@ -145,7 +153,40 @@ class AdminPanel {
         });
 
         html += '</tbody></table>';
+
+        // Render pagination if available
+        if (pagination && pagination.pages > 1) {
+            html += this.renderPagination(pagination);
+        }
+
         container.innerHTML = html;
+    }
+
+    renderPagination(pagination) {
+        let html = '<div class="pagination-container">';
+
+        // Prev button
+        html += `<button class="pagination-btn ${pagination.page <= 1 ? 'disabled' : ''}" 
+                 onclick="${pagination.page > 1 ? `admin.gotoPage(${pagination.page - 1})` : ''}">
+                 &lt; Prev
+                 </button>`;
+
+        // Page info
+        html += `<span class="pagination-info">Page ${pagination.page} / ${pagination.pages}</span>`;
+
+        // Next button
+        html += `<button class="pagination-btn ${pagination.page >= pagination.pages ? 'disabled' : ''}" 
+                 onclick="${pagination.page < pagination.pages ? `admin.gotoPage(${pagination.page + 1})` : ''}">
+                 Next &gt;
+                 </button>`;
+
+        html += '</div>';
+        return html;
+    }
+
+    gotoPage(page) {
+        this.page = page;
+        this.loadData();
     }
 
     async showAddForm(type) {
@@ -330,13 +371,15 @@ class AdminPanel {
             if (type === 'sources' && this.categories.length === 0) {
                 await this.fetchCategories();
             }
-            const response = await fetch(`/api/admin/${type}`);
+            const response = await fetch(`/api/admin/${type}/${id}`);
             const data = await response.json();
-            const item = (data.data || data).find(i => i.id == id);
+            const item = data.data || data;
 
             if (item) {
                 const modal = this.createModal(type, item);
                 document.body.appendChild(modal);
+            } else {
+                this.showError('Item not found');
             }
         } catch (error) {
             this.showError('Failed to load item: ' + error.message);

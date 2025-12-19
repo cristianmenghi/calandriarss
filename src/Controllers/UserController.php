@@ -17,6 +17,21 @@ class UserController
         echo json_encode(['data' => $users]);
     }
 
+    public function show($id)
+    {
+        AuthMiddleware::requireRole('admin');
+        
+        $user = User::findById($id);
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(['error' => 'User not found']);
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode(['data' => $user]);
+    }
+
     public function create()
     {
         AuthMiddleware::requireRole('admin');

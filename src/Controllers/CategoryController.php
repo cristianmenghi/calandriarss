@@ -17,6 +17,21 @@ class CategoryController
         echo json_encode(['data' => $categories]);
     }
 
+    public function show($id)
+    {
+        AuthMiddleware::handle();
+        
+        $category = Category::findById($id);
+        if (!$category) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Category not found']);
+            return;
+        }
+        
+        header('Content-Type: application/json');
+        echo json_encode(['data' => $category]);
+    }
+
     public function create()
     {
         AuthMiddleware::requireRole('admin');

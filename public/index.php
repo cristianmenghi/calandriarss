@@ -58,6 +58,7 @@ $router->get('/admin/users', [$admin, 'users']);
 // ADMIN API ROUTES - Sources
 // ============================================================================
 $router->get('/api/admin/sources', [$sources, 'index']);
+$router->get('/api/admin/sources/{id}', [$sources, 'show']);
 $router->post('/api/admin/sources', [$sources, 'create']);
 $router->put('/api/admin/sources/{id}', [$sources, 'update']);
 $router->delete('/api/admin/sources/{id}', [$sources, 'delete']);
@@ -68,6 +69,7 @@ $router->get('/api/admin/sources/{id}/stats', [$sources, 'stats']);
 // ADMIN API ROUTES - Categories
 // ============================================================================
 $router->get('/api/admin/categories', [$categories, 'index']);
+$router->get('/api/admin/categories/{id}', [$categories, 'show']);
 $router->post('/api/admin/categories', [$categories, 'create']);
 $router->put('/api/admin/categories/{id}', [$categories, 'update']);
 $router->delete('/api/admin/categories/{id}', [$categories, 'delete']);
@@ -76,6 +78,7 @@ $router->delete('/api/admin/categories/{id}', [$categories, 'delete']);
 // ADMIN API ROUTES - Users
 // ============================================================================
 $router->get('/api/admin/users', [$users, 'index']);
+$router->get('/api/admin/users/{id}', [$users, 'show']);
 $router->post('/api/admin/users', [$users, 'create']);
 $router->put('/api/admin/users/{id}', [$users, 'update']);
 $router->delete('/api/admin/users/{id}', [$users, 'delete']);
