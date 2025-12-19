@@ -137,7 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 
                 <div class="preview-body">
-                    ${article.description || article.content || '<em>No content available</em>'}
+                    ${article.description ? `<div class="preview-summary">${article.description}</div>` : ''}
+                    ${article.content && article.content !== article.description ? `<div class="preview-full-content">${article.content}</div>` : ''}
+                    ${!article.description && !article.content ? '<em>No content available</em>' : ''}
                 </div>
                 
                 <div class="preview-actions">
