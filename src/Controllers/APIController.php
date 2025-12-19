@@ -14,6 +14,7 @@ class APIController
         $filters = [
             'source_id' => $_GET['source_id'] ?? null,
             'category' => $_GET['category'] ?? null,
+            'category_id' => $_GET['category_id'] ?? null,
             'search' => $_GET['search'] ?? null,
         ];
 

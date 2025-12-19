@@ -20,13 +20,12 @@ class Article
             $params[':source_id'] = $filters['source_id'];
         }
         
-        if (!empty($filters['category'])) {
-            // Requires joining sources or having category in articles. 
-            // Simplified: assuming category filter checks sources.
-            // For now, let's just allow simple string match if we denormalized or join
-            // But let's stick to what we have. If we want to filter by category, we need a JOIN.
-             $where[] = "source_id IN (SELECT id FROM sources WHERE category = :category)";
-             $params[':category'] = $filters['category'];
+        if (!empty($filters['category_id'])) {
+            $where[] = "source_id IN (SELECT id FROM sources WHERE category = (SELECT slug FROM categories WHERE id = :category_id))";
+            $params[':category_id'] = $filters['category_id'];
+        } else if (!empty($filters['category'])) {
+            $where[] = "source_id IN (SELECT id FROM sources WHERE category = :category)";
+            $params[':category'] = $filters['category'];
         }
 
         if (!empty($filters['search'])) {
@@ -45,7 +44,7 @@ class Article
                 FROM articles 
                 JOIN sources ON articles.source_id = sources.id 
                 WHERE $whereSql 
-                ORDER BY published_at DESC 
+                ORDER BY published_at DESC, created_at DESC, id DESC 
                 LIMIT :limit OFFSET :offset";
                 
         $stmt = $db->prepare($sql);
