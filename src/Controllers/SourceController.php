@@ -11,23 +11,32 @@ class SourceController
     {
         AuthMiddleware::handle();
         
-        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
-        $search = isset($_GET['search']) ? $_GET['search'] : null;
-        
-        $sources = Source::paginate($page, $limit, $search);
-        $total = Source::getCount($search);
-        
-        header('Content-Type: application/json');
-        echo json_encode([
-            'data' => $sources,
-            'pagination' => [
-                'page' => $page,
-                'limit' => $limit,
-                'total' => $total,
-                'pages' => ceil($total / $limit)
-            ]
-        ]);
+        try {
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+            $search = isset($_GET['search']) ? $_GET['search'] : null;
+            
+            $sources = Source::paginate($page, $limit, $search);
+            $total = Source::getCount($search);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'data' => $sources,
+                'pagination' => [
+                    'page' => $page,
+                    'limit' => $limit,
+                    'total' => $total,
+                    'pages' => ceil($total / $limit)
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 
     public function create()

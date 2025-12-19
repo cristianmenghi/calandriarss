@@ -117,8 +117,10 @@ class Source
         $params = [];
 
         if ($search) {
-            $sql .= " WHERE name LIKE :search OR rss_feed_url LIKE :search OR description LIKE :search";
-            $params[':search'] = '%' . $search . '%';
+            $sql .= " WHERE name LIKE :search1 OR rss_feed_url LIKE :search2 OR description LIKE :search3";
+            $params[':search1'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
         }
 
         $stmt = $db->prepare($sql);
@@ -136,8 +138,10 @@ class Source
         $params = [];
 
         if ($search) {
-            $whereSql = " WHERE s.name LIKE :search OR s.rss_feed_url LIKE :search OR s.description LIKE :search";
-            $params[':search'] = '%' . $search . '%';
+            $whereSql = " WHERE s.name LIKE :search1 OR s.rss_feed_url LIKE :search2 OR s.description LIKE :search3";
+            $params[':search1'] = '%' . $search . '%';
+            $params[':search2'] = '%' . $search . '%';
+            $params[':search3'] = '%' . $search . '%';
         }
 
         $sql = "SELECT s.*, COUNT(a.id) as article_count 
