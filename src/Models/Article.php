@@ -98,10 +98,40 @@ class Article
         return $stmt->fetchColumn();
     }
     
-    public static function getCount()
+    public static function getCount($filters = [])
     {
         $db = Database::getInstance()->getConnection();
-        $stmt = $db->query("SELECT COUNT(*) as count FROM articles WHERE is_visible = 1");
+        
+        $where = ["is_visible = 1"];
+        $params = [];
+        
+        if (!empty($filters['source_id'])) {
+            $where[] = "source_id = :source_id";
+            $params[':source_id'] = $filters['source_id'];
+        }
+        
+        if (!empty($filters['category_id'])) {
+            $where[] = "source_id IN (SELECT id FROM sources WHERE category = (SELECT slug FROM categories WHERE id = :category_id))";
+            $params[':category_id'] = $filters['category_id'];
+        } else if (!empty($filters['category'])) {
+            $where[] = "source_id IN (SELECT id FROM sources WHERE category = :category)";
+            $params[':category'] = $filters['category'];
+        }
+
+        if (!empty($filters['search'])) {
+             if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                 $where[] = "(title LIKE :search OR description LIKE :search)";
+                 $params[':search'] = '%' . $filters['search'] . '%';
+             } else {
+                 $where[] = "(MATCH(title, description) AGAINST(:search IN NATURAL LANGUAGE MODE))";
+                 $params[':search'] = $filters['search'];
+             }
+        }
+
+        $whereSql = implode(' AND ', $where);
+        
+        $stmt = $db->prepare("SELECT COUNT(*) as count FROM articles WHERE $whereSql");
+        $stmt->execute($params);
         $result = $stmt->fetch();
         return $result['count'];
     }

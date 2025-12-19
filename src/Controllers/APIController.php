@@ -18,10 +18,20 @@ class APIController
             'search' => $_GET['search'] ?? null,
         ];
 
-        $articles = Article::paginate($page, 20, $filters);
+        $limit = 20;
+        $articles = Article::paginate($page, $limit, $filters);
+        $total = Article::getCount($filters);
         
         header('Content-Type: application/json');
-        echo json_encode(['data' => $articles]);
+        echo json_encode([
+            'data' => $articles,
+            'pagination' => [
+                'page' => $page,
+                'limit' => $limit,
+                'total' => $total,
+                'pages' => ceil($total / $limit)
+            ]
+        ]);
     }
 
     public function getSources()

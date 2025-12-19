@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const state = {
         currentCategory: null,
         currentArticle: null,
-        articles: []
+        articles: [],
+        page: 1,
+        loadingMore: false,
+        hasMore: true
     };
 
     // DOM Elements
@@ -26,6 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
         loadCategories();
         // Load all articles initially
         loadArticles();
+
+        // Infinite scroll listener
+        els.articlesList.addEventListener('scroll', () => {
+            if (state.loadingMore || !state.hasMore) return;
+
+            const { scrollTop, scrollHeight, clientHeight } = els.articlesList;
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                loadArticles(state.currentCategory, true);
+            }
+        });
     }
 
     // --- Data Fetching ---
@@ -41,22 +54,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function loadArticles(categoryId = null) {
-        els.articlesList.innerHTML = '<div class="loading">_fetching_feed...</div>';
+    async function loadArticles(categoryId = null, append = false) {
+        if (state.loadingMore) return;
+
+        if (!append) {
+            state.page = 1;
+            state.hasMore = true;
+            state.articles = [];
+            els.articlesList.innerHTML = '<div class="loading">_fetching_feed...</div>';
+            els.articlesList.scrollTop = 0;
+        } else {
+            state.page++;
+            // Show a small loading indicator at the bottom
+            const loader = document.createElement('div');
+            loader.className = 'loading-mini';
+            loader.id = 'infinite-loader';
+            loader.textContent = '_scrolling_deeper...';
+            els.articlesList.appendChild(loader);
+        }
+
+        state.loadingMore = true;
 
         try {
-            const url = categoryId
-                ? `/api/articles?category_id=${categoryId}`
-                : '/api/articles';
+            let url = categoryId
+                ? `/api/articles?category_id=${categoryId}&page=${state.page}`
+                : `/api/articles?page=${state.page}`;
 
             const res = await fetch(url);
             const data = await res.json();
 
-            state.articles = data.data || [];
-            renderArticles(state.articles);
+            // Remove mini loader
+            document.getElementById('infinite-loader')?.remove();
+
+            const newArticles = data.data || [];
+            const pagination = data.pagination || {};
+
+            if (append) {
+                state.articles = [...state.articles, ...newArticles];
+            } else {
+                state.articles = newArticles;
+            }
+
+            state.hasMore = state.page < pagination.pages;
+
+            renderArticles(newArticles, append);
         } catch (error) {
             console.error('Failed to load articles:', error);
-            els.articlesList.innerHTML = '<div class="error">Error loading feed</div>';
+            if (!append) {
+                els.articlesList.innerHTML = '<div class="error">Error loading feed</div>';
+            }
+        } finally {
+            state.loadingMore = false;
         }
     }
 
@@ -85,8 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
         els.categoriesList.innerHTML = html;
     }
 
-    function renderArticles(articles) {
-        if (articles.length === 0) {
+    function renderArticles(articles, append = false) {
+        if (!append && articles.length === 0) {
             els.articlesList.innerHTML = '<div class="empty-state">No articles found in this sector</div>';
             return;
         }
@@ -109,7 +157,15 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        els.articlesList.innerHTML = html;
+        if (append) {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            while (temp.firstChild) {
+                els.articlesList.appendChild(temp.firstChild);
+            }
+        } else {
+            els.articlesList.innerHTML = html;
+        }
     }
 
     function renderPreview(article) {
@@ -155,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.app = {
         selectCategory: (id, element) => {
+            if (state.currentCategory === id && id !== null) return;
+
             state.currentCategory = id;
 
             // Update UI
