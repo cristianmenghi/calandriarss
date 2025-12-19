@@ -12,10 +12,11 @@ class SourceController
         AuthMiddleware::handle();
         
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $limit = 20;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+        $search = isset($_GET['search']) ? $_GET['search'] : null;
         
-        $sources = Source::paginate($page, $limit);
-        $total = Source::getCount();
+        $sources = Source::paginate($page, $limit, $search);
+        $total = Source::getCount($search);
         
         header('Content-Type: application/json');
         echo json_encode([

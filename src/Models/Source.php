@@ -110,27 +110,48 @@ class Source
         return $stmt->execute([':id' => $id]);
     }
     
-    public static function getCount()
+    public static function getCount($search = null)
     {
         $db = Database::getInstance()->getConnection();
-        $stmt = $db->query("SELECT COUNT(*) as count FROM sources");
+        $sql = "SELECT COUNT(*) as count FROM sources";
+        $params = [];
+
+        if ($search) {
+            $sql .= " WHERE name LIKE :search OR rss_feed_url LIKE :search OR description LIKE :search";
+            $params[':search'] = '%' . $search . '%';
+        }
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
         $result = $stmt->fetch();
         return $result['count'];
     }
     
-    public static function paginate($page = 1, $limit = 20)
+    public static function paginate($page = 1, $limit = 20, $search = null)
     {
         $db = Database::getInstance()->getConnection();
         $offset = ($page - 1) * $limit;
         
+        $whereSql = "";
+        $params = [];
+
+        if ($search) {
+            $whereSql = " WHERE s.name LIKE :search OR s.rss_feed_url LIKE :search OR s.description LIKE :search";
+            $params[':search'] = '%' . $search . '%';
+        }
+
         $sql = "SELECT s.*, COUNT(a.id) as article_count 
                 FROM sources s 
                 LEFT JOIN articles a ON s.id = a.source_id 
+                $whereSql
                 GROUP BY s.id 
                 ORDER BY s.created_at DESC 
                 LIMIT :limit OFFSET :offset";
         
         $stmt = $db->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue($key, $val);
+        }
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();

@@ -50,6 +50,10 @@
                 <div class="toolbar">
                     <h1 style="color: var(--terminal-accent); margin: 0;">> Sources Management</h1>
                     <div class="toolbar-actions">
+                        <div class="search-box">
+                            <span class="prompt-symbol">></span>
+                            <input type="text" id="search-input" class="terminal-input-small" placeholder="search sources..." autocomplete="off">
+                        </div>
                         <button class="terminal-button" data-action="add" data-type="sources">+ Add Source</button>
                         <button class="terminal-button" data-action="refresh">↻ Refresh</button>
                     </div>

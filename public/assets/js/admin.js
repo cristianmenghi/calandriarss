@@ -8,6 +8,8 @@ class AdminPanel {
         this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         this.currentView = 'sources';
         this.categories = [];
+        this.searchQuery = '';
+        this.searchTimeout = null;
         this.init();
     }
 
@@ -26,6 +28,18 @@ class AdminPanel {
         document.querySelectorAll('[data-action="refresh"]').forEach(btn => {
             btn.addEventListener('click', () => this.loadData());
         });
+
+        // Search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value;
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.loadData();
+                }, 500);
+            });
+        }
     }
 
     setView(view) {
@@ -35,14 +49,38 @@ class AdminPanel {
 
     async loadData() {
         const view = this.currentView;
-        const endpoint = `/api/admin/${view}`;
+        let endpoint = `/api/admin/${view}`;
+
+        // Add search query for sources
+        if (view === 'sources' && this.searchQuery) {
+            endpoint += `?search=${encodeURIComponent(this.searchQuery)}`;
+        }
 
         try {
             const response = await fetch(endpoint);
             const data = await response.json();
             this.renderTable(view, data.data || data);
+
+            // Re-bind search input if it's in the DOM but doesn't have listeners
+            // (e.g. if we switch views and come back, though currently we stay on the same page)
+            this.bindSearchInput();
         } catch (error) {
             this.showError('Failed to load data: ' + error.message);
+        }
+    }
+
+    bindSearchInput() {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && !searchInput.dataset.bound) {
+            searchInput.dataset.bound = 'true';
+            searchInput.value = this.searchQuery;
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value;
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.loadData();
+                }, 500);
+            });
         }
     }
 
