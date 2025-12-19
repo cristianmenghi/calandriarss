@@ -7,6 +7,7 @@ class AdminPanel {
     constructor() {
         this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
         this.currentView = 'sources';
+        this.categories = [];
         this.init();
     }
 
@@ -109,9 +110,22 @@ class AdminPanel {
         container.innerHTML = html;
     }
 
-    showAddForm(type) {
+    async showAddForm(type) {
+        if (type === 'sources' && this.categories.length === 0) {
+            await this.fetchCategories();
+        }
         const modal = this.createModal(type);
         document.body.appendChild(modal);
+    }
+
+    async fetchCategories() {
+        try {
+            const response = await fetch('/api/admin/categories');
+            const data = await response.json();
+            this.categories = data.data || data;
+        } catch (error) {
+            console.error('Failed to fetch categories:', error);
+        }
     }
 
     createModal(type, item = null) {
@@ -156,8 +170,15 @@ class AdminPanel {
                     <input type="url" name="rss_feed_url" class="terminal-input" value="${item?.rss_feed_url || ''}" required>
                 </div>
                 <div class="form-group">
-                    <label class="prompt"><span class="prompt-symbol">></span> Category ID:</label>
-                    <input type="number" name="category_id" class="terminal-input" value="${item?.category_id || ''}">
+                    <label class="prompt"><span class="prompt-symbol">></span> Category:</label>
+                    <select name="category_id" class="terminal-input" required>
+                        <option value="">Select a category...</option>
+                        ${this.categories.map(cat => `
+                            <option value="${cat.id}" ${item?.category_id == cat.id ? 'selected' : ''}>
+                                ${this.escape(cat.name)}
+                            </option>
+                        `).join('')}
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="prompt"><span class="prompt-symbol">></span> Fetch Interval (minutes):</label>
@@ -268,6 +289,9 @@ class AdminPanel {
 
     async edit(type, id) {
         try {
+            if (type === 'sources' && this.categories.length === 0) {
+                await this.fetchCategories();
+            }
             const response = await fetch(`/api/admin/${type}`);
             const data = await response.json();
             const item = (data.data || data).find(i => i.id == id);
