@@ -43,52 +43,76 @@ class SourceController
     {
         AuthMiddleware::handle();
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        // Validation
-        if (empty($data['name']) || empty($data['rss_feed_url'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Name and RSS feed URL are required']);
-            return;
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            // Validation
+            if (empty($data['name']) || empty($data['rss_feed_url'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Name and RSS feed URL are required']);
+                return;
+            }
+            
+            // Test feed before saving
+            if (!$this->testFeedUrl($data['rss_feed_url'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid RSS feed URL']);
+                return;
+            }
+            
+            $sourceId = Source::create($data);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'id' => $sourceId,
+                'source' => Source::findById($sourceId)
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error' => 'Failed to create source: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
-        
-        // Test feed before saving
-        if (!$this->testFeedUrl($data['rss_feed_url'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid RSS feed URL']);
-            return;
-        }
-        
-        $sourceId = Source::create($data);
-        
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => true,
-            'id' => $sourceId,
-            'source' => Source::findById($sourceId)
-        ]);
     }
 
     public function update($id)
     {
         AuthMiddleware::handle();
         
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        // Test feed if URL changed
-        if (isset($data['rss_feed_url']) && !$this->testFeedUrl($data['rss_feed_url'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid RSS feed URL']);
-            return;
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            if (!$data) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid JSON data']);
+                return;
+            }
+
+            // Test feed if URL changed
+            if (isset($data['rss_feed_url']) && !$this->testFeedUrl($data['rss_feed_url'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid RSS feed URL']);
+                return;
+            }
+            
+            $success = Source::update($id, $data);
+            
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => $success,
+                'source' => Source::findById($id)
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error' => 'Failed to update source: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
-        
-        $success = Source::update($id, $data);
-        
-        header('Content-Type: application/json');
-        echo json_encode([
-            'success' => $success,
-            'source' => Source::findById($id)
-        ]);
     }
 
     public function delete($id)

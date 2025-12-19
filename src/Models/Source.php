@@ -17,13 +17,22 @@ class Source
     public static function create($data)
     {
         $db = Database::getInstance()->getConnection();
+        
+        $category = $data['category'] ?? null;
+        if (isset($data['category_id']) && !empty($data['category_id'])) {
+            $cat = Category::findById($data['category_id']);
+            if ($cat) {
+                $category = $cat['slug'];
+            }
+        }
+
         $sql = "INSERT INTO sources (name, website_url, rss_feed_url, category, logo_url, description) VALUES (:name, :website_url, :rss_feed_url, :category, :logo_url, :description)";
         $stmt = $db->prepare($sql);
         $stmt->execute([
             ':name' => $data['name'],
             ':website_url' => $data['website_url'] ?? null,
             ':rss_feed_url' => $data['rss_feed_url'],
-            ':category' => $data['category'] ?? null,
+            ':category' => $category,
             ':logo_url' => $data['logo_url'] ?? null,
             ':description' => $data['description'] ?? null
         ]);
@@ -78,6 +87,14 @@ class Source
             $fields[] = "category = :category";
             $params[':category'] = $data['category'];
         }
+
+        if (isset($data['category_id'])) {
+            $cat = Category::findById($data['category_id']);
+            if ($cat) {
+                 $fields[] = "category = :category_resolved";
+                 $params[':category_resolved'] = $cat['slug'];
+            }
+        }
         
         if (isset($data['logo_url'])) {
             $fields[] = "logo_url = :logo_url";
@@ -92,6 +109,11 @@ class Source
         if (isset($data['is_active'])) {
             $fields[] = "is_active = :is_active";
             $params[':is_active'] = $data['is_active'];
+        }
+
+        if (isset($data['fetch_interval'])) {
+            $fields[] = "fetch_interval = :fetch_interval";
+            $params[':fetch_interval'] = $data['fetch_interval'];
         }
         
         if (empty($fields)) {
