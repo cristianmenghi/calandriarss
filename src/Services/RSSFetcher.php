@@ -48,6 +48,13 @@ class RSSFetcher
                     $date = date('Y-m-d H:i:s');
                 }
 
+                // Reject articles with future dates
+                $itemTimestamp = strtotime($date);
+                if ($itemTimestamp !== false && $itemTimestamp > time()) {
+                    error_log("Skipping future-dated article from {$source['name']}: \"{$title}\" (date: {$date})");
+                    continue;
+                }
+
                 // Extract description (summary/excerpt) and content (full text)
                 $description = $item->get_description();
                 $content = $item->get_content();
