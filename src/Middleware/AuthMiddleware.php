@@ -44,7 +44,8 @@ class AuthMiddleware
         }
 
         // Check CSRF token for POST/PUT/DELETE requests (except login)
-        if (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'DELETE']) && $currentPath !== '/login' && $currentPath !== '/logout') {
+        // A1 FIX: /logout is no longer excluded — it requires a valid CSRF token
+        if (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'DELETE']) && $currentPath !== '/login') {
             self::validateCsrfToken();
         }
 
@@ -127,10 +128,14 @@ class AuthMiddleware
         session_destroy();
     }
 
-    public static function generateCsrfToken()
+    public static function generateCsrfToken(): string
     {
-        if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        // M3 FIX: rotate token every hour to limit exposure window
+        $ttl = 3600;
+        $now = time();
+        if (!isset($_SESSION['csrf_token']) || ($now - ($_SESSION['csrf_token_ts'] ?? 0)) > $ttl) {
+            $_SESSION['csrf_token']    = bin2hex(random_bytes(32));
+            $_SESSION['csrf_token_ts'] = $now;
         }
         return $_SESSION['csrf_token'];
     }
@@ -148,8 +153,18 @@ class AuthMiddleware
 
     private static function startSecureSession()
     {
-        $secure = $_ENV['SESSION_SECURE'] ?? false;
-        $httponly = $_ENV['SESSION_HTTPONLY'] ?? true;
+        // M4 FIX: auto-detect HTTPS when SESSION_SECURE is not explicitly set
+        $envSecure = $_ENV['SESSION_SECURE'] ?? '';
+        if (strtolower((string)$envSecure) === 'true') {
+            $secure = true;
+        } elseif (strtolower((string)$envSecure) === 'false') {
+            $secure = false;
+        } else {
+            // Auto-detect from current request
+            $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                   || (($_SERVER['SERVER_PORT'] ?? 80) == 443);
+        }
+        $httponly = filter_var($_ENV['SESSION_HTTPONLY'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         session_set_cookie_params([
             'lifetime' => 0,

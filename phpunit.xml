@@ -7,9 +7,13 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
+            <exclude>tests/Unit/Security</exclude>
         </testsuite>
         <testsuite name="Integration">
             <directory>tests/Integration</directory>
+        </testsuite>
+        <testsuite name="Security">
+            <directory>tests/Unit/Security</directory>
         </testsuite>
     </testsuites>
     <php>

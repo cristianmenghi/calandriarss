@@ -22,7 +22,10 @@ class Database
             }
             $this->pdo = new PDO($dsn, $config['username'], $config['password'], $config['options']);
         } catch (PDOException $e) {
-            die("Database Connection Failed: " . $e->getMessage());
+            error_log('[CalandriaRSS] Database connection failed: ' . $e->getMessage());
+            http_response_code(503);
+            header('Content-Type: application/json');
+            die(json_encode(['error' => 'Service temporarily unavailable']));
         }
     }
 
@@ -58,13 +61,19 @@ class Database
             }
             $this->pdo = new PDO($dsn, $config['username'], $config['password'], $config['options']);
         } catch (PDOException $e) {
-            die("Database Reconnection Failed: " . $e->getMessage());
+            error_log('[CalandriaRSS] Database reconnection failed: ' . $e->getMessage());
+            http_response_code(503);
+            header('Content-Type: application/json');
+            die(json_encode(['error' => 'Service temporarily unavailable']));
         }
     }
 
     // Prevent cloning
     private function __clone() {}
 
-    // Prevent unserializing
-    public function __wakeup() {}
+    // Prevent unserializing (B3: explicit throw to block unserialize() attacks)
+    public function __wakeup(): void
+    {
+        throw new \Exception('Cannot unserialize a singleton Database instance.');
+    }
 }

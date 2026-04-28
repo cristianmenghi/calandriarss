@@ -30,11 +30,13 @@ class SourceController
                 ]
             ]);
         } catch (\Throwable $e) {
+            error_log('[CalandriaRSS] SourceController@index: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             http_response_code(500);
             header('Content-Type: application/json');
+            $debug = ($_ENV['APP_ENV'] ?? 'production') === 'local';
             echo json_encode([
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $debug ? $e->getMessage() : 'Internal server error',
+                'trace' => $debug ? $e->getTraceAsString() : null,
             ]);
         }
     }
@@ -69,11 +71,13 @@ class SourceController
                 'source' => Source::findById($sourceId)
             ]);
         } catch (\Throwable $e) {
+            error_log('[CalandriaRSS] SourceController@create: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             http_response_code(500);
             header('Content-Type: application/json');
+            $debug = ($_ENV['APP_ENV'] ?? 'production') === 'local';
             echo json_encode([
-                'error' => 'Failed to create source: ' . $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $debug ? 'Failed to create source: ' . $e->getMessage() : 'Internal server error',
+                'trace' => $debug ? $e->getTraceAsString() : null,
             ]);
         }
     }
@@ -127,11 +131,13 @@ class SourceController
                 'source' => Source::findById($id)
             ]);
         } catch (\Throwable $e) {
+            error_log('[CalandriaRSS] SourceController@update: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             http_response_code(500);
             header('Content-Type: application/json');
+            $debug = ($_ENV['APP_ENV'] ?? 'production') === 'local';
             echo json_encode([
-                'error' => 'Failed to update source: ' . $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $debug ? 'Failed to update source: ' . $e->getMessage() : 'Internal server error',
+                'trace' => $debug ? $e->getTraceAsString() : null,
             ]);
         }
     }
@@ -159,26 +165,61 @@ class SourceController
         echo json_encode(['valid' => $isValid]);
     }
 
-    private function testFeedUrl($url)
+    /**
+     * A2 FIX — SSRF prevention.
+     * Only allows http/https URLs resolving to public (non-private) IPs.
+     */
+    private function testFeedUrl(string $url): bool
     {
+        // 1. Only allow http / https schemes
+        if (!preg_match('#^https?://#i', $url)) {
+            return false;
+        }
+
+        $parsed = parse_url($url);
+        $host   = $parsed['host'] ?? '';
+        if (empty($host)) {
+            return false;
+        }
+
+        // 2. Resolve hostname and block private / reserved IP ranges
+        $ip = gethostbyname($host);
+        if ($this->isPrivateIp($ip)) {
+            return false;
+        }
+
         try {
             $feed = new \SimplePie\SimplePie();
             $feed->set_feed_url($url);
             $feed->enable_cache(false);
+            $feed->set_timeout(10);
             $feed->init();
-            
+
             return !$feed->error();
         } catch (\Exception $e) {
             return false;
         }
     }
 
+    /**
+     * Returns true if the IP is in a private / reserved range.
+     * Uses PHP's built-in FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE.
+     */
+    private function isPrivateIp(string $ip): bool
+    {
+        return !filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        );
+    }
+
     public function stats($id)
     {
         AuthMiddleware::handle();
-        
+
         $stats = Source::getStats($id);
-        
+
         header('Content-Type: application/json');
         echo json_encode($stats);
     }

@@ -16,6 +16,15 @@ use App\Middleware\AuthMiddleware;
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
+// ============================================================================
+// SECURITY HEADERS (B1)
+// ============================================================================
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src fonts.gstatic.com; img-src 'self' data: https:;");
+
 // Simple Template Engine (using native PHP)
 function view($path, $data = []) {
     extract($data);
@@ -51,7 +60,6 @@ $router->get('/api/auth/check', [$auth, 'checkAuth']);
 $router->get('/admin', [$admin, 'dashboard']);
 $router->get('/admin/sources', [$admin, 'sources']);
 $router->get('/admin/categories', [$admin, 'categories']);
-$router->get('/admin/users', [$admin, 'users']);
 $router->get('/admin/users', [$admin, 'users']);
 
 // ============================================================================

@@ -137,24 +137,27 @@ class User
         return $user && ($user['role'] === $role || $user['role'] === 'admin');
     }
 
-    public static function checkLoginAttempts($ipAddress)
+    public static function checkLoginAttempts(string $ipAddress, string $username = ''): bool
     {
         $db = Database::getInstance()->getConnection();
         
-        $maxAttempts = $_ENV['LOGIN_MAX_ATTEMPTS'] ?? 5;
-        $lockoutTime = $_ENV['LOGIN_LOCKOUT_TIME'] ?? 900; // 15 minutes
-        
+        $maxAttempts = (int)($_ENV['LOGIN_MAX_ATTEMPTS'] ?? 5);
+        $lockoutTime = (int)($_ENV['LOGIN_LOCKOUT_TIME'] ?? 900); // 15 minutes
+
+        // B4 FIX: rate-limit by BOTH ip_address AND username
         $stmt = $db->prepare("
             SELECT COUNT(*) as attempts 
             FROM login_attempts 
-            WHERE ip_address = :ip 
+            WHERE (ip_address = :ip OR (:username != '' AND username = :username2))
             AND success = 0 
             AND attempted_at > DATE_SUB(NOW(), INTERVAL :lockout SECOND)
         ");
         
         $stmt->execute([
-            ':ip' => $ipAddress,
-            ':lockout' => $lockoutTime
+            ':ip'        => $ipAddress,
+            ':username'  => $username,
+            ':username2' => $username,
+            ':lockout'   => $lockoutTime
         ]);
         
         $result = $stmt->fetch();

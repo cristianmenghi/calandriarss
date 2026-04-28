@@ -7,6 +7,9 @@ use App\Middleware\AuthMiddleware;
 
 class UserController
 {
+    private const ALLOWED_ROLES = ['admin', 'moderator', 'viewer'];
+    private const MIN_PASSWORD_LENGTH = 12;
+
     public function index()
     {
         AuthMiddleware::requireRole('admin');
@@ -38,10 +41,31 @@ class UserController
         
         $data = json_decode(file_get_contents('php://input'), true);
         
-        // Validation
+        // Required fields
         if (empty($data['username']) || empty($data['email']) || empty($data['password'])) {
             http_response_code(400);
             echo json_encode(['error' => 'Username, email, and password are required']);
+            return;
+        }
+
+        // M2 FIX: validate email format
+        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid email format']);
+            return;
+        }
+
+        // M2 FIX: validate role against whitelist
+        if (isset($data['role']) && !in_array($data['role'], self::ALLOWED_ROLES, true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid role. Allowed: ' . implode(', ', self::ALLOWED_ROLES)]);
+            return;
+        }
+
+        // M2 FIX: enforce minimum password length
+        if (strlen($data['password']) < self::MIN_PASSWORD_LENGTH) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters']);
             return;
         }
         
@@ -59,8 +83,8 @@ class UserController
         header('Content-Type: application/json');
         echo json_encode([
             'success' => true,
-            'id' => $userId,
-            'user' => User::findById($userId)
+            'id'      => $userId,
+            'user'    => User::findById($userId)
         ]);
     }
 
@@ -69,9 +93,28 @@ class UserController
         AuthMiddleware::requireRole('admin');
         
         $data = json_decode(file_get_contents('php://input'), true);
+
+        // M2 FIX: validate email if provided
+        if (isset($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid email format']);
+            return;
+        }
+
+        // M2 FIX: validate role if provided
+        if (isset($data['role']) && !in_array($data['role'], self::ALLOWED_ROLES, true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid role. Allowed: ' . implode(', ', self::ALLOWED_ROLES)]);
+            return;
+        }
         
         // Handle password update if provided
         if (!empty($data['password'])) {
+            if (strlen($data['password']) < self::MIN_PASSWORD_LENGTH) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters']);
+                return;
+            }
             User::updatePassword($id, $data['password']);
         }
         unset($data['password']);
@@ -81,7 +124,7 @@ class UserController
         header('Content-Type: application/json');
         echo json_encode([
             'success' => $success,
-            'user' => User::findById($id)
+            'user'    => User::findById($id)
         ]);
     }
 
@@ -122,6 +165,13 @@ class UserController
         if (empty($data['new_password'])) {
             http_response_code(400);
             echo json_encode(['error' => 'New password is required']);
+            return;
+        }
+
+        // M2 FIX: enforce minimum password length
+        if (strlen($data['new_password']) < self::MIN_PASSWORD_LENGTH) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Password must be at least ' . self::MIN_PASSWORD_LENGTH . ' characters']);
             return;
         }
         

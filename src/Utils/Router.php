@@ -30,9 +30,13 @@ class Router
     {
         $method = $_SERVER['REQUEST_METHOD'];
         
-        // Handle method override for PUT/DELETE from forms
+        // Handle method override for PUT/DELETE from forms (M1: whitelist)
+        $allowedOverrides = ['PUT', 'PATCH', 'DELETE'];
         if ($method === 'POST' && isset($_POST['_method'])) {
-            $method = strtoupper($_POST['_method']);
+            $override = strtoupper($_POST['_method']);
+            if (in_array($override, $allowedOverrides, true)) {
+                $method = $override;
+            }
         }
         
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

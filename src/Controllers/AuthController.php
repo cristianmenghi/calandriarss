@@ -17,8 +17,8 @@ class AuthController
         
         view('login', [
             'csrf_token' => AuthMiddleware::generateCsrfToken(),
-            'error' => $_SESSION['login_error'] ?? null,
-            'redirect' => $_GET['redirect'] ?? '/admin'
+            'error'      => $_SESSION['login_error'] ?? null,
+            'redirect'   => $this->sanitizeRedirect($_GET['redirect'] ?? '/admin') // C1 FIX
         ]);
         
         unset($_SESSION['login_error']);
@@ -31,8 +31,8 @@ class AuthController
         $redirect = $_POST['redirect'] ?? '/admin';
         $ipAddress = $_SERVER['REMOTE_ADDR'];
 
-        // Check rate limiting
-        if (!User::checkLoginAttempts($ipAddress)) {
+        // Check rate limiting (B4: now checks by IP AND username)
+        if (!User::checkLoginAttempts($ipAddress, $username)) {
             $_SESSION['login_error'] = 'Too many failed attempts. Please try again later.';
             header('Location: /login');
             exit;
@@ -52,7 +52,8 @@ class AuthController
         User::logLoginAttempt($ipAddress, $username, true);
         AuthMiddleware::login($user);
 
-        header('Location: ' . $redirect);
+        // C1 FIX: validate redirect before issuing Location header
+        header('Location: ' . $this->sanitizeRedirect($redirect));
         exit;
     }
 
@@ -115,5 +116,18 @@ class AuthController
             'success' => true,
             'user_id' => $userId
         ]);
+    }
+
+    /**
+     * C1 FIX — Open Redirect prevention.
+     * Only allows internal relative paths starting with a single /.
+     * Blocks: //evil.com, /\evil.com, javascript:, http:, data:, empty strings.
+     */
+    private function sanitizeRedirect(string $redirect): string
+    {
+        if (!preg_match('#^/([a-zA-Z0-9][a-zA-Z0-9/_\-?=&%.]*)?$#', $redirect)) {
+            return '/admin';
+        }
+        return $redirect;
     }
 }
