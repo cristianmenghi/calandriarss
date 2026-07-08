@@ -1,0 +1,48 @@
+name: MegaLinter
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '36 0 * * 6' # Sábados a las 00:36 UTC (igual que el CodeQL anterior)
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # necesario para subir SARIF a GitHub Security
+      issues: write
+      pull-requests: write
+      statuses: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # historial completo para análisis de diff en PRs
+
+      - name: Run MegaLinter (PHP flavor)
+        id: ml
+        uses: oxsecurity/megalinter/flavors/php@v8
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # En push analiza todo el repo; en PR analiza solo los archivos cambiados
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name != 'pull_request' }}
+
+      - name: Upload MegaLinter reports as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: megalinter-reports
+          path: megalinter-reports/
+          retention-days: 7
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: megalinter-reports/megalinter-report.sarif

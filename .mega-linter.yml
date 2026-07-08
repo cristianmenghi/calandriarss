@@ -1,0 +1,23 @@
+# MegaLinter configuration
+# Docs: https://megalinter.io/latest/configuration/
+
+# No auto-fix; solo reportar
+APPLY_FIXES: none
+
+# Excluir vendor y cache de tests
+FILTER_REGEX_EXCLUDE: (vendor/|\.phpunit\.cache/)
+
+# Linters adicionales al flavor PHP (Semgrep es de repositorio, no viene por defecto)
+ENABLE_LINTERS:
+  - REPOSITORY_SEMGREP
+
+# Semgrep: rulesets de seguridad enfocados en PHP y OWASP
+REPOSITORY_SEMGREP_RULESETS:
+  - "p/php"
+  - "p/owasp-top-ten"
+  - "p/security-audit"
+
+# Reportes
+SARIF_REPORTER: true
+TEXT_REPORTER: true
+GITHUB_STATUS_REPORTER: true
