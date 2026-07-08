@@ -53,8 +53,12 @@ class Router
             $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_]+)', $route);
             if (preg_match("#^$pattern$#", $path, $matches)) {
                 array_shift($matches); // Remove full match
-                // nosemgrep: php.lang.security.call-user-func.call-user-func
-                return call_user_func_array($callback, $matches);
+
+                // $callback is registered internally via get()/post()/etc., never from user input.
+                // $matches are already restricted to [a-zA-Z0-9_]+ by the route regex above.
+                // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable
+                $safeArgs = array_map('strval', $matches);
+                return call_user_func_array($callback, $safeArgs);
             }
         }
 
