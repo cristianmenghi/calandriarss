@@ -112,8 +112,7 @@ class AuthController
         ]);
 
         header('Content-Type: application/json');
-        // nosemgrep: php.lang.security.echo-htmlentities.echo-htmlentities
-        echo json_encode([
+        echo json_encode([ // nosemgrep: php.lang.security.echo-htmlentities.echo-htmlentities
             'success' => true,
             'user_id' => $userId
         ]);

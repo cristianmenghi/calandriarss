@@ -56,15 +56,13 @@ class Router
 
                 // $callback is registered internally via get()/post()/etc., never from user input.
                 // $matches are already restricted to [a-zA-Z0-9_]+ by the route regex above.
-                // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable
                 $safeArgs = array_map('strval', $matches);
-                return call_user_func_array($callback, $safeArgs);
+                return call_user_func_array($callback, $safeArgs); // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable
             }
         }
 
         if (isset($this->routes[$method][$path])) {
-            // nosemgrep: php.lang.security.call-user-func.call-user-func
-            return call_user_func($this->routes[$method][$path]);
+            return call_user_func($this->routes[$method][$path]); // nosemgrep: php.lang.security.injection.tainted-callable.tainted-callable
         }
 
         http_response_code(404);
