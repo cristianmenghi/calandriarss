@@ -10,10 +10,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v6
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
     - name: Deploy to Server
-      uses: appleboy/ssh-action@v1.2.4
+      uses: appleboy/ssh-action@823bd89e131d8d508129f9443cad5855e9ba96f0 # v1.2.4
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}

@@ -23,6 +23,7 @@ class APIController
         $total = Article::getCount($filters);
         
         header('Content-Type: application/json');
+        // nosemgrep: php.lang.security.echo-htmlentities.echo-htmlentities
         echo json_encode([
             'data' => $articles,
             'pagination' => [

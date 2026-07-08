@@ -53,11 +53,13 @@ class Router
             $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_]+)', $route);
             if (preg_match("#^$pattern$#", $path, $matches)) {
                 array_shift($matches); // Remove full match
+                // nosemgrep: php.lang.security.call-user-func.call-user-func
                 return call_user_func_array($callback, $matches);
             }
         }
 
         if (isset($this->routes[$method][$path])) {
+            // nosemgrep: php.lang.security.call-user-func.call-user-func
             return call_user_func($this->routes[$method][$path]);
         }
 

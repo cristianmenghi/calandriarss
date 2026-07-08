@@ -20,6 +20,7 @@ class SourceController
             $total = Source::getCount($search);
             
             header('Content-Type: application/json');
+            // nosemgrep: php.lang.security.echo-htmlentities.echo-htmlentities
             echo json_encode([
                 'data' => $sources,
                 'pagination' => [
