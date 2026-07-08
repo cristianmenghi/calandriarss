@@ -6,7 +6,7 @@
         "php": ">=8.0",
         "ext-pdo": "*",
         "ext-simplexml": "*",
-        "guzzlehttp/guzzle": "^7.0",
+        "guzzlehttp/guzzle": "^7.12.1",
         "simplepie/simplepie": "^1.8",
         "monolog/monolog": "^3.0",
         "league/plates": "^3.5",
