@@ -27,7 +27,7 @@ jobs:
 
       - name: Run MegaLinter (PHP flavor)
         id: ml
-        uses: oxsecurity/megalinter/flavors/php@e08c2b05e3dbc40af4c23f41172ef1e068a7d651 # v8
+        uses: oxsecurity/megalinter/flavors/php@9949bad031045f366be2467e00e8371a7328a2e2 # v10.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # En push analiza todo el repo; en PR analiza solo los archivos cambiados
